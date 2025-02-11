@@ -75,19 +75,15 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         employeeTableViewOutlet.delegate = self
         
         ref.child("employees").observe(.childAdded, with: { (snapshot) in
-                   // snapshot is a dictionary with a key and a dictionary as a value
-                    // this gets the dictionary from each snapshot
+                  
                     let dict = snapshot.value as! [String:Any]
                    
-                    // building a Student object from the dictionary
             let employee = Employee(dict: dict)
             employee.key = snapshot.key
-                    // adding the student object to the Student array
             self.employees.append(employee)
             self.employeeTableViewOutlet.reloadData()
         
                 })
-        // Do any additional setup after loading the view.
     }
 
     @IBAction func addPersonAction(_ sender: UIButton) {
