@@ -49,6 +49,10 @@ class Employee{
         key = ref.child("employees").childByAutoId().key ?? "0"
     }
     
+    func deleteFromFirebase(){
+        ref.child("employees").child(key).removeValue()
+    }
+    
 }
 
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
@@ -84,6 +88,20 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             self.employeeTableViewOutlet.reloadData()
         
                 })
+        
+        ref.child("employees").observe(.childRemoved, with: { (snapshot) in
+            
+            let dict = snapshot.value as! [String:Any]
+            let emp = Employee(dict: dict)
+            emp.key = snapshot.key
+            
+            for num in 0...self.employees.count - 1{
+                if self.employees[num].key == emp.key{
+                    self.employees.remove(at: num)
+                }
+            }
+            self.employeeTableViewOutlet.reloadData()
+        })
     }
 
     @IBAction func addPersonAction(_ sender: UIButton) {
@@ -108,8 +126,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = employeeTableViewOutlet.dequeueReusableCell(withIdentifier: "myCell")!
         let employee = employees[indexPath.row]
-        cell.textLabel?.text = "Name: \(employee.name) \t Position: \(employee.position) \n Salary: $\(employee.salary)"
+        cell.textLabel?.text = "Name: \(employee.name) \n Position: \(employee.position) \n Salary: $\(employee.salary)"
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+      if editingStyle == .delete {
+          self.employees[indexPath.row].deleteFromFirebase()
+      }
     }
     
 }
